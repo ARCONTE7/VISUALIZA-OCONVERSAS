@@ -131,4 +131,47 @@ app.get('/health', (req, res) => {
 
 app.listen(port, () => {
   console.log(`🚀 Dashboard rodando na porta ${port}`);
+
+// Rota para chat estilo WhatsApp
+app.get('/chat/:id', async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    
+    // Busca a conversa
+    const conversationResult = await pool.query(`
+      SELECT * FROM conversations WHERE id = $1
+    `, [conversationId]);
+    
+    if (conversationResult.rows.length === 0) {
+      return res.status(404).send('Conversa não encontrada');
+    }
+    
+    const conversation = conversationResult.rows[0];
+    
+    // Busca o contato
+    const contactResult = await pool.query(`
+      SELECT * FROM contacts WHERE id = $1
+    `, [conversation.contact_id]);
+    
+    const contact = contactResult.rows[0];
+    
+    // Busca as mensagens
+    const messagesResult = await pool.query(`
+      SELECT * FROM messages 
+      WHERE conversation_id = $1
+      ORDER BY created_at ASC
+    `, [conversationId]);
+    
+    res.render('chat', {
+      conversation,
+      contact,
+      messages: messagesResult.rows
+    });
+    
+  } catch (error) {
+    console.error('Erro no chat:', error);
+    res.status(500).send('Erro ao carregar chat');
+  }
+});
+  
 });

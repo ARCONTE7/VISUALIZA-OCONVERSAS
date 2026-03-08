@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard de Conversas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Cards de estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 32px; font-weight: bold; color: #1DB954; }
+        
+        /* Grid principal */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        /* Cards de listas */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .card-header h2 { font-size: 16px; color: #333; }
+        .card-body { padding: 20px; }
+        
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th { 
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge.incoming { background: #e3f2fd; color: #1976d2; }
+        .badge.outgoing { background: #e8f5e8; color: #2e7d32; }
+        
+        /* Links */
+        a { 
+            color: #1DB954;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover { text-decoration: underline; }
+        
+        /* Mensagem */
+        .message-preview {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 20px;">📊 Dashboard de Conversas</h1>
+        
+        <!-- Cards de estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total de Contatos</h3>
+                <div class="value"><%= stats.total_contacts %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Total de Conversas</h3>
+                <div class="value"><%= stats.total_conversations %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Total de Mensagens</h3>
+                <div class="value"><%= stats.total_messages %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Mensagens Recebidas</h3>
+                <div class="value"><%= stats.incoming_messages %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Mensagens Enviadas</h3>
+                <div class="value"><%= stats.outgoing_messages %></div>
+            </div>
+        </div>
+        
+        <!-- Grid principal -->
+        <div class="grid">
+            <!-- Coluna da esquerda -->
+            <div>
+                <!-- Últimas conversas -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>💬 Últimas Conversas</h2>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Status</th>
+                                    <th>Última mensagem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% conversations.forEach(conv => { %>
+                                <tr>
+                                    <td>
+                                        <a href="/conversa/<%= conv.conversation_id %>">
+                                            <%= conv.name || conv.phone_number %>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= conv.status %>">
+                                            <%= conv.status %>
+                                        </span>
+                                    </td>
+                                    <td class="message-preview"><%= conv.last_message %></td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Coluna da direita -->
+            <div>
+                <!-- Últimas mensagens -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📨 Últimas Mensagens</h2>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Direção</th>
+                                    <th>Mensagem</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% messages.forEach(msg => { %>
+                                <tr>
+                                    <td><%= msg.name || msg.phone_number %></td>
+                                    <td>
+                                        <span class="badge <%= msg.direction %>">
+                                            <%= msg.direction %>
+                                        </span>
+                                    </td>
+                                    <td class="message-preview"><%= msg.content %></td>
+                                    <td><%= new Date(msg.created_at).toLocaleString() %></td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Contatos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>👥 Últimos Contatos</h2>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>Cadastro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% contacts.forEach(contact => { %>
+                                <tr>
+                                    <td><%= contact.name %></td>
+                                    <td><%= contact.phone_number %></td>
+                                    <td><%= new Date(contact.created_at).toLocaleDateString() %></td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

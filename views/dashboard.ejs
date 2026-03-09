@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Dashboard de Conversas</title>
+    <meta http-equiv="refresh" content="30"> <!-- ← NOVO: refresh automático -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -11,7 +12,6 @@
         }
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* Cards de estatísticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -27,14 +27,12 @@
         .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
         .stat-card .value { font-size: 32px; font-weight: bold; color: #1DB954; }
         
-        /* Grid principal */
         .grid {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 20px;
         }
         
-        /* Cards de listas */
         .card {
             background: white;
             border-radius: 10px;
@@ -48,7 +46,6 @@
         .card-header h2 { font-size: 16px; color: #333; }
         .card-body { padding: 20px; }
         
-        /* Tabelas */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -65,7 +62,6 @@
         }
         tr:hover { background: #f8f9fa; }
         
-        /* Badges */
         .badge {
             display: inline-block;
             padding: 3px 8px;
@@ -76,7 +72,6 @@
         .badge.incoming { background: #e3f2fd; color: #1976d2; }
         .badge.outgoing { background: #e8f5e8; color: #2e7d32; }
         
-        /* Links */
         a { 
             color: #1DB954;
             text-decoration: none;
@@ -84,7 +79,6 @@
         }
         a:hover { text-decoration: underline; }
         
-        /* Mensagem */
         .message-preview {
             max-width: 300px;
             overflow: hidden;
@@ -95,11 +89,38 @@
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
         }
+
+        /* Botão de refresh manual */
+        .refresh-btn {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .refresh-btn:hover {
+            background: #169c46;
+        }
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="margin-bottom: 20px;">📊 Dashboard de Conversas</h1>
+        <div class="header-flex">
+            <h1>📊 Dashboard de Conversas</h1>
+            <button class="refresh-btn" onclick="location.reload()">
+                🔄 Atualizar Agora
+            </button>
+        </div>
         
         <!-- Cards de estatísticas -->
         <div class="stats-grid">
@@ -193,7 +214,6 @@
                                     </td>
                                     <td class="message-preview"><%= msg.content %></td>
                                     <td><%= new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
-
                                 </tr>
                                 <% }) %>
                             </tbody>
@@ -229,6 +249,10 @@
                 </div>
             </div>
         </div>
+        
+        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+            Atualizado automaticamente a cada 30 segundos
+        </p>
     </div>
 </body>
 </html>

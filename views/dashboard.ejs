@@ -192,7 +192,8 @@
                                         </span>
                                     </td>
                                     <td class="message-preview"><%= msg.content %></td>
-                                    <td><%= new Date(msg.created_at).toLocaleString() %></td>
+                                    <td><%= new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
+
                                 </tr>
                                 <% }) %>
                             </tbody>

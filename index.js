@@ -56,10 +56,14 @@ app.get('/', async (req, res) => {
       LIMIT 20
     `);
     
-    // Buscar últimas mensagens
+    // Buscar últimas mensagens (com campos específicos)
     const messagesResult = await pool.query(`
       SELECT 
-        m.*,
+        m.id,
+        m.content,
+        m.direction,
+        m.type,
+        m.created_at,
         ct.phone_number,
         ct.name
       FROM messages m
@@ -99,7 +103,11 @@ app.get('/conversa/:id', async (req, res) => {
     
     const messagesResult = await pool.query(`
       SELECT 
-        m.*,
+        m.id,
+        m.content,
+        m.direction,
+        m.type,
+        m.created_at,
         ct.phone_number,
         ct.name
       FROM messages m
@@ -113,6 +121,10 @@ app.get('/conversa/:id', async (req, res) => {
       SELECT * FROM conversations WHERE id = $1
     `, [conversationId]);
     
+    if (conversationResult.rows.length === 0) {
+      return res.status(404).send('Conversa não encontrada');
+    }
+    
     res.render('conversa', {
       messages: messagesResult.rows,
       conversation: conversationResult.rows[0]
@@ -121,6 +133,58 @@ app.get('/conversa/:id', async (req, res) => {
   } catch (error) {
     console.error('❌ Erro ao buscar conversa:', error);
     res.status(500).send('Erro ao carregar conversa');
+  }
+});
+
+// Rota para chat estilo WhatsApp
+app.get('/chat/:id', async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    
+    // Busca a conversa
+    const conversationResult = await pool.query(`
+      SELECT * FROM conversations WHERE id = $1
+    `, [conversationId]);
+    
+    if (conversationResult.rows.length === 0) {
+      return res.status(404).send('Conversa não encontrada');
+    }
+    
+    const conversation = conversationResult.rows[0];
+    
+    // Busca o contato
+    const contactResult = await pool.query(`
+      SELECT * FROM contacts WHERE id = $1
+    `, [conversation.contact_id]);
+    
+    const contact = contactResult.rows[0];
+    
+    // Busca as mensagens da conversa
+    const messagesResult = await pool.query(`
+      SELECT 
+        m.id,
+        m.content,
+        m.direction,
+        m.type,
+        m.created_at,
+        ct.phone_number,
+        ct.name
+      FROM messages m
+      JOIN conversations c ON m.conversation_id = c.id
+      JOIN contacts ct ON c.contact_id = ct.id
+      WHERE m.conversation_id = $1
+      ORDER BY m.created_at ASC
+    `, [conversationId]);
+    
+    res.render('chat', {
+      conversation,
+      contact,
+      messages: messagesResult.rows
+    });
+    
+  } catch (error) {
+    console.error('❌ Erro no chat:', error);
+    res.status(500).send('Erro ao carregar chat');
   }
 });
 

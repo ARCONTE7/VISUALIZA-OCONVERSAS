@@ -56,14 +56,10 @@ app.get('/', async (req, res) => {
       LIMIT 20
     `);
     
-    // Buscar mensagens (SEM FILTRO DE TYPE)
+    // Buscar últimas mensagens
     const messagesResult = await pool.query(`
       SELECT 
-        m.id,
-        m.content,
-        m.direction,
-        m.type,
-        m.created_at,
+        m.*,
         ct.phone_number,
         ct.name
       FROM messages m
@@ -103,11 +99,7 @@ app.get('/conversa/:id', async (req, res) => {
     
     const messagesResult = await pool.query(`
       SELECT 
-        m.id,
-        m.content,
-        m.direction,
-        m.type,
-        m.created_at,
+        m.*,
         ct.phone_number,
         ct.name
       FROM messages m

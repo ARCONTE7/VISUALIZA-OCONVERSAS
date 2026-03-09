@@ -56,7 +56,7 @@ app.get('/', async (req, res) => {
       LIMIT 20
     `);
     
-    // Buscar últimas mensagens (com campos específicos)
+    // Buscar últimas mensagens (FILTRANDO BOTÕES)
     const messagesResult = await pool.query(`
       SELECT 
         m.id,
@@ -69,6 +69,10 @@ app.get('/', async (req, res) => {
       FROM messages m
       JOIN conversations c ON m.conversation_id = c.id
       JOIN contacts ct ON c.contact_id = ct.id
+      WHERE m.content NOT LIKE '[BOTÃO]%'
+        AND m.content NOT LIKE '[LISTA]%'
+        AND m.content IS NOT NULL
+        AND m.content != ''
       ORDER BY m.created_at DESC 
       LIMIT 50
     `);
@@ -114,6 +118,10 @@ app.get('/conversa/:id', async (req, res) => {
       JOIN conversations c ON m.conversation_id = c.id
       JOIN contacts ct ON c.contact_id = ct.id
       WHERE m.conversation_id = $1
+        AND m.content NOT LIKE '[BOTÃO]%'
+        AND m.content NOT LIKE '[LISTA]%'
+        AND m.content IS NOT NULL
+        AND m.content != ''
       ORDER BY m.created_at ASC
     `, [conversationId]);
     
@@ -136,7 +144,7 @@ app.get('/conversa/:id', async (req, res) => {
   }
 });
 
-// Rota para chat estilo WhatsApp
+// Rota para chat estilo WhatsApp (mantém botões para contexto)
 app.get('/chat/:id', async (req, res) => {
   try {
     const conversationId = req.params.id;
@@ -159,7 +167,7 @@ app.get('/chat/:id', async (req, res) => {
     
     const contact = contactResult.rows[0];
     
-    // Busca as mensagens da conversa
+    // Busca as mensagens da conversa (SEM FILTRO para chat)
     const messagesResult = await pool.query(`
       SELECT 
         m.id,

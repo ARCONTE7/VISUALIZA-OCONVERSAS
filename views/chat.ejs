@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat estilo WhatsApp</title>
+    <title>Chat com <%= contact.name || contact.phone_number %></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
+        body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #e5ddd5;
             height: 100vh;
@@ -36,12 +36,17 @@
             border-radius: 50%;
             background: #128C7E;
         }
+        .chat-header a {
+            color: white;
+            text-decoration: none;
+            margin-left: auto;
+            font-size: 20px;
+        }
         .chat-messages {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
             background: #e5ddd5;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23e5ddd5" opacity="0.1"/></svg>');
         }
         .message {
             margin-bottom: 15px;
@@ -77,111 +82,46 @@
         .outgoing .time {
             text-align: right;
         }
-        .chat-input {
-            padding: 15px;
+        .back-link {
+            display: block;
+            padding: 10px;
             background: #f0f0f0;
-            display: flex;
-            gap: 10px;
-        }
-        .chat-input input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 25px;
-            outline: none;
-        }
-        .chat-input button {
-            background: #075e54;
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        .chat-input button:hover {
-            background: #128C7E;
-        }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #075e54;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            text-align: center;
+            color: #075e54;
             text-decoration: none;
-            font-size: 14px;
-        }
-        .back-button:hover {
-            background: #128C7E;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <a href="/" class="back-button">← Dashboard</a>
-    
     <div class="chat-container">
         <div class="chat-header">
-            <img src="https://ui-avatars.com/api/?name=<%= contact?.name || 'Cliente' %>&background=128C7E&color=fff&size=40" alt="Avatar">
+            <img src="https://ui-avatars.com/api/?name=<%= contact.name || 'Cliente' %>&background=128C7E&color=fff&size=40" alt="Avatar">
             <div>
-                <h3><%= contact?.name || 'Cliente' %></h3>
-                <p style="font-size: 12px; opacity: 0.8;"><%= contact?.phone_number %></p>
+                <h3><%= contact.name || 'Cliente' %></h3>
+                <p style="font-size: 12px; opacity: 0.8;"><%= contact.phone_number %></p>
             </div>
+            <a href="/conversa/<%= conversation.id %>">✕</a>
         </div>
         
         <div class="chat-messages" id="messages">
             <% messages.forEach(msg => { %>
-                <div class="message <%= msg.direction %>">
-                    <div class="bubble">
-                        <%= msg.content %>
-                        <span class="time"><%= new Date(msg.created_at).toLocaleTimeString() %></span>
-                    </div>
+            <div class="message <%= msg.direction %>">
+                <div class="bubble">
+                    <%= msg.content %>
+                    <span class="time"><%= new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></span>
                 </div>
+            </div>
             <% }) %>
         </div>
         
-        <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Digite uma mensagem...">
-            <button id="sendButton">➤</button>
-        </div>
+        <a href="/conversa/<%= conversation.id %>" class="back-link">← Voltar para conversa</a>
     </div>
     
     <script>
-        const conversationId = '<%= conversation.id %>';
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const messagesDiv = document.getElementById('messages');
-        
         // Auto scroll para o final
+        const messagesDiv = document.getElementById('messages');
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        
-        // Enviar mensagem
-        sendButton.addEventListener('click', async () => {
-            const text = messageInput.value.trim();
-            if (!text) return;
-            
-            // Adiciona mensagem na UI (otimista)
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message outgoing';
-            messageDiv.innerHTML = `
-                <div class="bubble">
-                    ${text}
-                    <span class="time">agora</span>
-                </div>
-            `;
-            messagesDiv.appendChild(messageDiv);
-            messageInput.value = '';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            // Aqui você pode implementar o envio real via n8n depois
-        });
-        
-        // Enter para enviar
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendButton.click();
-        });
     </script>
 </body>
 </html>

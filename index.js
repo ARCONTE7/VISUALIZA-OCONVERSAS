@@ -40,23 +40,23 @@ app.get('/', async (req, res) => {
       LIMIT 50
     `);
     
-    // Substitua a query atual de mensagens por esta:
-const messagesResult = await pool.query(`
-  SELECT 
-    m.*,
-    ct.phone_number,
-    ct.name
-  FROM messages m
-  JOIN conversations c ON m.conversation_id = c.id
-  JOIN contacts ct ON c.contact_id = ct.id
-  WHERE m.type = 'text'  -- ← FILTRO IMPORTANTE!
-    AND m.content NOT LIKE '[BOTÃO]%'  -- ← Remove mensagens de botão
-    AND m.content NOT LIKE '[LISTA]%'   -- ← Remove mensagens de lista
-  ORDER BY m.created_at DESC 
-  LIMIT 50
-`);
+    // Buscar conversas recentes
+    const conversationsResult = await pool.query(`
+      SELECT 
+        c.id as conversation_id,
+        c.status,
+        c.last_message,
+        c.last_message_at,
+        ct.id as contact_id,
+        ct.phone_number,
+        ct.name
+      FROM conversations c
+      JOIN contacts ct ON c.contact_id = ct.id
+      ORDER BY c.last_message_at DESC 
+      LIMIT 20
+    `);
     
-    // Buscar últimas mensagens
+    // Buscar mensagens (APENAS UMA VEZ, COM FILTRO)
     const messagesResult = await pool.query(`
       SELECT 
         m.*,
@@ -65,6 +65,9 @@ const messagesResult = await pool.query(`
       FROM messages m
       JOIN conversations c ON m.conversation_id = c.id
       JOIN contacts ct ON c.contact_id = ct.id
+      WHERE m.type = 'text' 
+        AND m.content NOT LIKE '[BOTÃO]%'  
+        AND m.content NOT LIKE '[LISTA]%'
       ORDER BY m.created_at DESC 
       LIMIT 50
     `);
@@ -129,9 +132,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Dashboard rodando na porta ${port}`);
-
 // Rota para chat estilo WhatsApp
 app.get('/chat/:id', async (req, res) => {
   try {
@@ -173,5 +173,7 @@ app.get('/chat/:id', async (req, res) => {
     res.status(500).send('Erro ao carregar chat');
   }
 });
-  
+
+app.listen(port, () => {
+  console.log(`🚀 Dashboard rodando na porta ${port}`);
 });

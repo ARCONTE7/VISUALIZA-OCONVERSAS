@@ -71,7 +71,7 @@
             <div class="message <%= msg.direction %>">
                 <strong><%= msg.name || msg.phone_number %></strong>
                 <p><%= msg.content %></p>
-                <small><%= new Date(msg.created_at).toLocaleString() %></small>
+                new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
             </div>
             <% }) %>
         </div>

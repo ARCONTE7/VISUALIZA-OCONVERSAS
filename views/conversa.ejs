@@ -63,7 +63,7 @@
         <div class="header">
             <h2>Conversa #<%= conversation.id %></h2>
             <p>Status: <%= conversation.status %></p>
-            <p>Início: <%= new Date(conversation.created_at).toLocaleString() %></p>
+            <p>Início: <%= new Date(conversation.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></p>
         </div>
         
         <div class="messages">
@@ -71,13 +71,15 @@
             <div class="message <%= msg.direction %>">
                 <strong><%= msg.name || msg.phone_number %></strong>
                 <p><%= msg.content %></p>
-                new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+                <small><%= new Date(msg.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></small>
             </div>
             <% }) %>
         </div>
+        
+        <!-- Link para chat estilo WhatsApp (agora DENTRO do container) -->
+        <a href="/chat/<%= conversation.id %>" style="display: block; text-align: center; margin: 20px; padding: 10px; background: #075e54; color: white; text-decoration: none; border-radius: 5px;">
+            Abrir Chat Estilo WhatsApp
+        </a>
     </div>
 </body>
 </html>
-<a href="/chat/<%= conversation.id %>" style="display: block; text-align: center; margin: 20px; padding: 10px; background: #075e54; color: white; text-decoration: none; border-radius: 5px;">
-    Abrir Chat Estilo WhatsApp
-</a>
